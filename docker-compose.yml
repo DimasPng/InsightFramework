@@ -1,0 +1,65 @@
+services:
+  nginx:
+    build:
+      context: ./docker/nginx
+    volumes:
+      - .:/var/www/html
+    ports:
+      - '${APP_PORT:-80}:80'
+    depends_on:
+      - php-fpm
+    networks:
+      - mynetwork
+  php-fpm:
+    container_name: myframework
+    build:
+      context: ./docker/app
+      args:
+        PUID: ${WWWUSER}
+        PGID: ${WWWGROUP}
+        INSTALL_XDEBUG: ${INSTALL_XDEBUG}
+    volumes:
+      - .:/var/www/html
+    user: "1000:1000"
+    environment:
+      PHP_IDE_CONFIG: "serverName=Docker"
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    networks:
+      - mynetwork
+  mysql:
+    image: mysql:8.3
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 1
+    ports:
+      - '${FORWARD_DB_PORT:-3306}:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - mynetwork
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping"]
+      retries: 3
+      timeout: 5s
+  ftp-server:
+    environment:
+      - FTP_PASS=${STORAGE_FTP_PASSWORD:-password}
+      - FTP_USER=${STORAGE_FTP_USERNAME:-app}
+    image: garethflowers/ftp-server
+    ports:
+      - '20-21:20-21/tcp'
+      - '40000-40009:40000-40009/tcp'
+    volumes:
+      - ./storage/app/public:${STORAGE_FTP_HOME:-/home/app}
+    networks:
+      - mynetwork
+volumes:
+  mysql-data:
+
+networks:
+  mynetwork:
+    driver: bridge

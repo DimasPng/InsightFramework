@@ -2,9 +2,6 @@
 
 namespace App\Core;
 
-use App\Controllers\HomeController;
-use App\Services\ExampleService;
-
 class App
 {
     protected Router $router;
@@ -25,20 +22,11 @@ class App
 
     protected function registerRoutes(): void
     {
-        $this->router->add('', 'HomeController@index');
-        $this->router->add('about', 'HomeController@about');
+        $this->router->add('', 'App\Controllers\HomeController@index');
+        $this->router->add('about', 'App\Controllers\HomeController@about');
     }
 
     protected function registerBindings(): void
     {
-        $this->container->bind('ExampleService', function () {
-            return new ExampleService();
-        });
-
-        $this->container->bind('HomeController', function (Container $container) {
-            return new HomeController(
-                $container->make('ExampleService')
-            );
-        });
     }
 }

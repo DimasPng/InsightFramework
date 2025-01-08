@@ -11,7 +11,7 @@ class Router
         $this->routes[$route] = $action;
     }
 
-    public function dispatch(Request $request): void
+    public function dispatch(Request $request, Container $container): void
     {
         $uri = $request->uri();
 
@@ -21,22 +21,19 @@ class Router
             return;
         }
 
-        [$controller, $method] = explode('@', $this->routes[$uri]);
+        [$controllerKey, $method] = explode('@', $this->routes[$uri]);
 
-        $controllerClass = "App\\Controllers\\$controller";
-        if(!class_exists($controllerClass)) {
-            http_response_code(404);
-            echo "Controller $controller not found";
-            return;
+        try {
+            $controller = $container->make($controllerKey);
+
+            if (!method_exists($controller, $method)) {
+                throw new \Exception("Method $method not found in $controllerKey");
+            }
+
+            $controller->$method();
+        } catch (\Exception $e) {
+            http_response_code(500);
+            echo "Error: " . $e->getMessage();
         }
-
-        $controllerInstance = new $controllerClass();
-        if (!method_exists($controllerInstance, $method)) {
-            http_response_code(404);
-            echo "Method $method not found in $controller";
-            return;
-        }
-
-        $controllerInstance->$method();
     }
 }

@@ -1,0 +1,14 @@
+{
+    "name": "root/html",
+    "authors": [
+        {
+            "name": "DimasPng"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}

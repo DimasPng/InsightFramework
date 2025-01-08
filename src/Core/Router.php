@@ -6,32 +6,37 @@ class Router
 {
     protected array $routes = [];
 
-    public function add(string $route, string $controller, string $method): void
+    public function add(string $route, string $action): void
     {
-        $this->routes[$route] = ['controller' => $controller, 'method' => $method];
+        $this->routes[$route] = $action;
     }
 
-    public function dispatch(string $uri): void
+    public function dispatch(Request $request): void
     {
-        if (array_key_exists($uri, $this->routes)) {
-            $route = $this->routes[$uri];
-            $controllerName = "\\App\\Controllers\\" . $route['controller'];
-            $method = $route['method'];
+        $uri = $request->uri();
 
-            if (class_exists($controllerName)) {
-                $controller = new $controllerName();
-                if (method_exists($controller, $method)) {
-                    $controller->$method();
-                    return;
-                }
-            }
-
+        if(!isset($this->routes[$uri])) {
             http_response_code(404);
-            echo "Method not found";
+            echo "404 Not Found";
             return;
         }
 
-        http_response_code(404);
-        echo "Route not found";
+        [$controller, $method] = explode('@', $this->routes[$uri]);
+
+        $controllerClass = "App\\Controllers\\$controller";
+        if(!class_exists($controllerClass)) {
+            http_response_code(404);
+            echo "Controller $controller not found";
+            return;
+        }
+
+        $controllerInstance = new $controllerClass();
+        if (!method_exists($controllerInstance, $method)) {
+            http_response_code(404);
+            echo "Method $method not found in $controller";
+            return;
+        }
+
+        $controllerInstance->$method();
     }
 }

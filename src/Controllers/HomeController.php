@@ -8,11 +8,11 @@ class HomeController extends Controller
 {
     public function index(): void
     {
-        echo "Welcome to the Home Page";
+        $this->render('home', ['title' => 'HomePage', 'content' => 'Welcome to the home page!']);
     }
 
     public function about(): void
     {
-        echo "About us page";
+        $this->render('about', ['title' => 'About us', 'content' => 'This is the about page']);
     }
 }

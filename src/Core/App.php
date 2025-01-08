@@ -4,15 +4,22 @@ namespace App\Core;
 
 class App
 {
-    public function __construct(
-        public Router $router
-    )
+    protected Router $router;
+    public function __construct()
     {
+        $this->router = new Router();
+        $this->registerRoutes();
     }
 
     public function run(): void
     {
-        $uri = $_SERVER['REQUEST_URI'];
-        $this->router->dispatch($uri);
+        $request = Request::capture();
+        $this->router->dispatch($request);
+    }
+
+    protected function registerRoutes(): void
+    {
+        $this->router->add('', 'HomeController@index');
+        $this->router->add('about', 'HomeController@about');
     }
 }

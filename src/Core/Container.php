@@ -10,10 +10,17 @@ use ReflectionNamedType;
 class Container
 {
     protected array $bindings = [];
+    protected array $singletons = [];
 
     public function bind(string $key, callable $resolver): void
     {
         $this->bindings[$key] = $resolver;
+    }
+
+    public function singleton(string $key, callable $resolver): void
+    {
+        $this->bindings[$key] = $resolver;
+        $this->singletons[$key] = null;
     }
 
     /**
@@ -21,6 +28,13 @@ class Container
      */
     public function make(string $key): object
     {
+        if(array_key_exists($key, $this->singletons)) {
+            if($this->singletons[$key] === null) {
+                $this->singletons[$key] = call_user_func($this->bindings[$key], $this);
+            }
+            return $this->singletons[$key];
+        }
+
         if (isset($this->bindings[$key])) {
             return call_user_func($this->bindings[$key], $this);
         }

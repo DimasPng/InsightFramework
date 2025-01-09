@@ -2,8 +2,8 @@
 
 namespace App\Core;
 
-use App\Controllers\HomeController;
 use App\Services\DatabaseConnection;
+use ReflectionException;
 
 class App
 {
@@ -15,12 +15,15 @@ class App
         $this->router = new Router();
         $this->container = new Container();
 
-        Route::init($this->router);
+        RouteFacade::init($this->router);
 
         $this->registerRoutes();
         $this->registerBindings();
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public function run(): void
     {
         $request = Request::capture();

@@ -4,55 +4,37 @@ namespace App\Core;
 
 class Route
 {
-    protected static Router $router;
-    protected static string $currentPrefix = '';
+    protected array $middleware = [];
+    public ?string $name = null;
 
-    public static function init(Router $router): void
+    public function __construct(
+        public string          $uri,
+        protected string       $method,
+        protected array|string $action
+    )
     {
-        self::$router = $router;
     }
 
-    public static function get(string $uri, array|string $action): void
+    public function middleware(string|array $middleware): self
     {
-        self::$router->add('GET', self::applyPrefix($uri), $action);
+        $this->middleware = is_array($middleware) ? $middleware : [$middleware];
+        return $this;
     }
 
-    public static function post(string $uri, array|string $action): void
+    public function name(string $name): self
     {
-        self::$router->add('POST', self::applyPrefix($uri), $action);
+        $this->name = $name;
+        return $this;
     }
 
-    public static function put(string $uri, array|string $action): void
+    public function getDefinition(): array
     {
-        self::$router->add('PUT', self::applyPrefix($uri), $action);
-    }
-
-    public static function patch(string $uri, array|string $action): void
-    {
-        self::$router->add('PATCH', self::applyPrefix($uri), $action);
-    }
-
-    public static function delete(string $uri, array|string $action): void
-    {
-        self::$router->add('DELETE', self::applyPrefix($uri), $action);
-    }
-
-    public static function prefix(string $prefix): self
-    {
-        self::$currentPrefix = trim(self::$currentPrefix . '/' . trim($prefix, '/'), '/');
-        return new self();
-    }
-
-    public function group(callable $routes): void
-    {
-        $parentPrefix = self::$currentPrefix;
-        self::$currentPrefix = $parentPrefix;
-        $routes();
-        self::$currentPrefix = $parentPrefix;
-    }
-
-    protected static function applyPrefix(string $uri): string
-    {
-        return self::$currentPrefix ? self::$currentPrefix . '/' . trim($uri, '/') : trim($uri, '/');
+        return [
+            'method' => $this->method,
+            'uri' => $this->uri,
+            'action' => $this->action,
+            'middleware' => $this->middleware,
+            'name' => $this->name
+        ];
     }
 }

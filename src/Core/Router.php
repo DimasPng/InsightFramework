@@ -3,48 +3,76 @@
 namespace App\Core;
 
 use Exception;
+use ReflectionException;
 
 class Router
 {
-    protected array $routes = [];
+    protected RouteCollection $routeCollection;
 
-    public function add(string $method, string $uri, array|string $action): void
+    public function __construct()
     {
-        $uri = '/' . trim($uri, '/');
-        $this->routes[$method][$uri] = $action;
+        $this->routeCollection = new RouteCollection();
     }
 
+    public function add(string $method, string $uri, array|string $action): Route
+    {
+        $route = new Route ($uri, $method, $action);
+        $this->routeCollection->add($route);
+        return $route;
+    }
+
+    public function group(array $attributes, callable $routes): void
+    {
+        $this->routeCollection->group($attributes, $routes);
+    }
+
+    /**
+     * @throws ReflectionException
+     */
     public function dispatch(Request $request, Container $container): void
     {
-        $uri = '/' . trim($request->uri(), '/');
+        $uri = trim($request->uri(), '/');
         $method = $request->method();
 
-        if (!isset($this->routes[$method][$uri])) {
-            http_response_code(404);
-            echo "404 Not Found";
-            return;
-        }
+        $routeFound = false;
 
-        $action = $this->routes[$method][$uri];
+        foreach ($this->routeCollection->getRoutes() as $route) {
+            $definition = $route->getDefinition();
+            $registeredUri = trim($definition['uri'], '/');
 
-        try {
-            if (is_array($action)) {
-                [$controllerKey, $method] = $action;
-                $controller = $container->make($controllerKey);
+            if ($registeredUri === $uri && $definition['method'] === $method) {
+                $routeFound = true;
 
-                if (!method_exists($controller, $method)) {
-                    throw new Exception("Method $method not found in $controllerKey");
+                $middlewarePipeline = new MiddlewarePipeline();
+
+                foreach ($definition['middleware'] as $middlewareClass) {
+                    $middlewarePipeline->pipe($container->make($middlewareClass));
                 }
 
-                $controller->$method();
-            } elseif (is_string($action) && is_callable($action)) {
-                call_user_func($action);
-            } else {
-                throw new Exception("Invalid route action for $uri");
+                $response = $middlewarePipeline->process($request, function ($request) use ($container, $definition) {
+                    $action = $definition['action'];
+
+                    if (is_array($action)) {
+                        [$controller, $method] = $action;
+                        $controllerInstance = $container->make($controller);
+                        return $controllerInstance->$method();
+                    }
+
+                    if (is_callable($action)) {
+                        return call_user_func($action);
+                    }
+
+                    throw new Exception("Invalid route action");
+                });
+
+                echo $response;
+                return;
             }
-        } catch (Exception $e) {
-            http_response_code(500);
-            echo "Error: " . $e->getMessage();
+        }
+
+        if (!$routeFound) {
+            http_response_code(404);
+            echo "404 Not Found";
         }
     }
 }

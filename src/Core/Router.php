@@ -10,12 +10,13 @@ class Router
 
     public function add(string $method, string $uri, array|string $action): void
     {
+        $uri = '/' . trim($uri, '/');
         $this->routes[$method][$uri] = $action;
     }
 
     public function dispatch(Request $request, Container $container): void
     {
-        $uri = $request->uri();
+        $uri = '/' . trim($request->uri(), '/');
         $method = $request->method();
 
         if (!isset($this->routes[$method][$uri])) {

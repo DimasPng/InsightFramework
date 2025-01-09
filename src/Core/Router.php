@@ -2,6 +2,8 @@
 
 namespace App\Core;
 
+use Exception;
+
 class Router
 {
     protected array $routes = [];
@@ -27,11 +29,11 @@ class Router
             $controller = $container->make($controllerKey);
 
             if (!method_exists($controller, $method)) {
-                throw new \Exception("Method $method not found in $controllerKey");
+                throw new Exception("Method $method not found in $controllerKey");
             }
 
             $controller->$method();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             http_response_code(500);
             echo "Error: " . $e->getMessage();
         }

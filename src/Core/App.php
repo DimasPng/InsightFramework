@@ -2,6 +2,7 @@
 
 namespace App\Core;
 
+use App\Controllers\HomeController;
 use App\Services\DatabaseConnection;
 
 class App
@@ -13,6 +14,9 @@ class App
     {
         $this->router = new Router();
         $this->container = new Container();
+
+        Route::init($this->router);
+
         $this->registerRoutes();
         $this->registerBindings();
     }
@@ -25,8 +29,9 @@ class App
 
     protected function registerRoutes(): void
     {
-        $this->router->add('', 'App\Controllers\HomeController@index');
-        $this->router->add('about', 'App\Controllers\HomeController@about');
+        foreach (glob(__DIR__ . '/../../routes/*.php') as $routeFile) {
+            require_once $routeFile;
+        }
     }
 
     protected function registerBindings(): void

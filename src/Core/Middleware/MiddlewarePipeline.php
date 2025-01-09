@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Core;
+namespace App\Core\Middleware;
+
+use App\Core\Request;
 
 class MiddlewarePipeline
 {

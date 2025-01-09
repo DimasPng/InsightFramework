@@ -2,6 +2,7 @@
 
 namespace App\Core;
 
+use App\Core\Middleware\MiddlewarePipeline;
 use Exception;
 use ReflectionException;
 

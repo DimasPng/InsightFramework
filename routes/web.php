@@ -1,7 +1,7 @@
 <?php
 
 use App\Controllers\HomeController;
-use App\Core\AuthMiddleware;
+use App\Core\Middleware\AuthMiddleware;
 use App\Core\RouteFacade as Route;
 
 Route::get('/', [HomeController::class, 'index']);

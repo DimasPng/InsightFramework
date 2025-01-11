@@ -4,6 +4,7 @@ namespace App\Services;
 
 use PDO;
 
+//сделать хранилищем или менеджером для PDO как в laravel
 class DatabaseConnection
 {
     protected PDO $connection;
@@ -23,5 +24,10 @@ class DatabaseConnection
     {
         $stmt = $this->connection->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getConnection(): PDO
+    {
+        return $this->connection;
     }
 }

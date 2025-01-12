@@ -2,23 +2,19 @@
 
 namespace App\Core;
 
-use App\Services\DatabaseConnection;
 use ReflectionException;
 
 class App
 {
-    protected Router $router;
     protected Container $container;
+    protected array $config = [];
 
     public function __construct()
     {
-        $this->router = new Router();
         $this->container = new Container();
-
-        RouteFacade::init($this->router);
-
-        $this->registerRoutes();
-        $this->registerBindings();
+        $this->container->singleton(Container::class, fn($container) => $container);
+        $this->loadConfig();
+        $this->registerProviders();
     }
 
     /**
@@ -27,25 +23,27 @@ class App
     public function run(): void
     {
         $request = Request::capture();
-        $this->router->dispatch($request, $this->container);
+
+        $this->container->make(Router::class)->dispatch($request, $this->container);
     }
 
-    protected function registerRoutes(): void
+    protected function loadConfig(): void
     {
-        foreach (glob(__DIR__ . '/../../routes/*.php') as $routeFile) {
-            require_once $routeFile;
+        $this->config = require __DIR__ . '/../config/app.php';
+    }
+
+    protected function registerProviders(): void
+    {
+        if (!isset($this->config['providers']) || !is_array($this->config['providers'])) {
+            return;
         }
-    }
 
-    protected function registerBindings(): void
-    {
-        $this->container->singleton('App\Services\DatabaseConnection', function () {
-            $dsn = sprintf('mysql:host=mysql;port=%s;dbname=%s;charset=utf8mb4',
-                '3306',
-                'framework'
-            );
+        foreach ($this->config['providers'] as $providerClass) {
+            /** @var ServiceProvider $provider */
+            $provider = $this->container->make($providerClass);
 
-            return new DatabaseConnection($dsn, 'dimas', 'pass123');
-        });
+            $provider->register();
+            $provider->boot();
+        }
     }
 }

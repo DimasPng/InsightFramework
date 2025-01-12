@@ -42,6 +42,11 @@ class Container
         return $this->resolve($key);
     }
 
+    public function has(string $key): bool
+    {
+        return isset($this->bindings[$key]) || isset($this->singletons[$key]);
+    }
+
     /**
      * @throws ReflectionException
      * @throws Exception

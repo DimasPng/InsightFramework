@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+use App\Console\Kernel;
+use App\Core\App;
+
+$app = new App();
+
+/** @var Kernel $kernel */
+$kernel = $app->getContainer()->make(Kernel::class);
+
+$command = $argv[1] ?? 'list';
+$args = array_slice($argv, 2);
+
+if ($command === 'list') {
+    $kernel->listCommands();
+} else {
+    $kernel->handle($command, $args);
+}

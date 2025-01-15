@@ -32,6 +32,11 @@ class App
         $this->config = require __DIR__ . '/../config/app.php';
     }
 
+    public function getContainer(): Container
+    {
+        return $this->container;
+    }
+
     protected function registerProviders(): void
     {
         if (!isset($this->config['providers']) || !is_array($this->config['providers'])) {

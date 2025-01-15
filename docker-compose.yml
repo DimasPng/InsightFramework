@@ -10,6 +10,7 @@ services:
       - php-fpm
     networks:
       - mynetwork
+    restart: unless-stopped
   php-fpm:
     container_name: myframework
     build:
@@ -27,6 +28,7 @@ services:
       - 'host.docker.internal:host-gateway'
     networks:
       - mynetwork
+    restart: unless-stopped
   mysql:
     image: mysql:8.3
     environment:
@@ -45,6 +47,7 @@ services:
       test: ["CMD", "mysqladmin", "ping"]
       retries: 3
       timeout: 5s
+    restart: unless-stopped
   ftp-server:
     environment:
       - FTP_PASS=${STORAGE_FTP_PASSWORD:-password}
@@ -57,6 +60,7 @@ services:
       - ./storage/app/public:${STORAGE_FTP_HOME:-/home/app}
     networks:
       - mynetwork
+    restart: unless-stopped
 volumes:
   mysql-data:
 

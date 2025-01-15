@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use PDO;
+use PDOException;
 
 //сделать хранилищем или менеджером для PDO как в laravel
 class DatabaseConnection
@@ -14,7 +15,7 @@ class DatabaseConnection
         try {
             $this->connection = new PDO($dsn, $username, $password);
             $this->connection->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             echo "Error connecting to database: " . $e->getMessage();
             throw $e;
         }

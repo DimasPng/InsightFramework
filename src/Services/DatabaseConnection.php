@@ -27,6 +27,12 @@ class DatabaseConnection
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    public function fetchColumn(string $sql): mixed
+    {
+        $stmt = $this->connection->query($sql);
+        return $stmt->fetchColumn();
+    }
+
     public function getConnection(): PDO
     {
         return $this->connection;

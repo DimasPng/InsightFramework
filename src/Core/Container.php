@@ -26,17 +26,17 @@ class Container
     /**
      * @throws ReflectionException
      */
-    public function make(string $key): object
+    public function make(string $key, array $parameters = []): object
     {
         if(array_key_exists($key, $this->singletons)) {
             if($this->singletons[$key] === null) {
-                $this->singletons[$key] = call_user_func($this->bindings[$key], $this);
+                $this->singletons[$key] = call_user_func($this->bindings[$key], $this, $parameters);
             }
             return $this->singletons[$key];
         }
 
         if (isset($this->bindings[$key])) {
-            return call_user_func($this->bindings[$key], $this);
+            return call_user_func($this->bindings[$key], $this, $parameters);
         }
 
         return $this->resolve($key);

@@ -6,6 +6,7 @@ use ReflectionException;
 
 class App
 {
+    protected static ?self $instance = null;
     protected Container $container;
     protected array $config = [];
 
@@ -15,6 +16,8 @@ class App
         $this->container->singleton(Container::class, fn($container) => $container);
         $this->loadConfig();
         $this->registerProviders();
+
+        self::$instance = $this;
     }
 
     /**
@@ -35,6 +38,11 @@ class App
     public function getContainer(): Container
     {
         return $this->container;
+    }
+
+    public static function getInstance(): ?self
+    {
+        return self::$instance;
     }
 
     protected function registerProviders(): void

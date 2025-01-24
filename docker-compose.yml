@@ -21,6 +21,7 @@ services:
         INSTALL_XDEBUG: ${INSTALL_XDEBUG}
     volumes:
       - .:/var/www/html
+      - ./docker/php-sessions:/var/lib/php/sessions
     user: "1000:1000"
     environment:
       PHP_IDE_CONFIG: "serverName=Docker"

@@ -9,7 +9,8 @@ return [
      */
     'providers' => [
         \App\Providers\DatabaseServiceProvider::class,
-        \App\Providers\RouteServiceProvider::class
+        \App\Providers\RouteServiceProvider::class,
+        \App\Providers\AuthServiceProvider::class,
     ],
     'debug' => true
 ];

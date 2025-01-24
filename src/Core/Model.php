@@ -65,6 +65,50 @@ abstract class Model
         return $model;
     }
 
+    public static function where(string $columnName, mixed $value, string $operator = '='): array
+    {
+        self::ensureDbConnection();
+
+        $table = static::$table;
+
+        $sql = "SELECT * FROM {$table} WHERE {$columnName} {$operator} :value";
+
+        $stmt = self::$db->prepare($sql);
+        $stmt->bindParam(':value', $value);
+        $stmt->execute();
+
+        $results = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $model = new static();
+            $model->forceFill($row);
+            $results[] = $model;
+        }
+
+        return $results;
+    }
+
+    public static function findByEmail(string $email): ?static
+    {
+        self::ensureDbConnection();
+
+        $table = static::$table;
+
+        $sql = "SELECT * FROM {$table} WHERE email = :email LIMIT 1";
+        $stmt = self::$db->prepare($sql);
+        $stmt->execute(['email' => $email]);
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            return null;
+        }
+
+        $model = new static();
+        $model->forceFill($row);
+
+        return $model;
+    }
+
     /**
      * @throws Exception
      */

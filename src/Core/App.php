@@ -13,7 +13,7 @@ class App
     public function __construct()
     {
         $this->container = new Container();
-        $this->container->singleton(Container::class, fn($container) => $container);
+        $this->container->singleton(Container::class, fn(Container $container) => $container);
         $this->loadConfig();
         $this->registerProviders();
 

@@ -2,17 +2,16 @@
 
 namespace App\Core;
 
-use App\Core\Middleware\MiddlewarePipeline;
+use App\Core\Middleware\MiddlewareStack;
 use Exception;
-use ReflectionException;
 
 class Router
 {
-    protected RouteCollection $routeCollection;
-
-    public function __construct()
+    public function __construct(
+        protected RouteCollection $routeCollection,
+        protected MiddlewareStack $middlewareStack,
+    )
     {
-        $this->routeCollection = new RouteCollection();
     }
 
     public function add(string $method, string $uri, array|string $action): Route
@@ -27,53 +26,78 @@ class Router
         $this->routeCollection->group($attributes, $routes);
     }
 
-    /**
-     * @throws ReflectionException
-     */
     public function dispatch(Request $request, Container $container): void
     {
-        $uri = trim($request->uri(), '/');
-        $method = $request->method();
+        $route = $this->findRoute($request);
 
-        $routeFound = false;
+        if (!$route) {
+            $this->sendNotFoundResponse();
+        }
 
+        $middleware = $this->resolveMiddlewareRoute($route);
+
+        $response = $this->middlewareStack->handle(
+            $request,
+            fn () => $this->executeRoute($route, $container),
+            $middleware
+        );
+
+        echo $response;
+    }
+
+    private function findRoute(Request $request): ?Route
+    {
         foreach ($this->routeCollection->getRoutes() as $route) {
             $definition = $route->getDefinition();
-            $registeredUri = trim($definition['uri'], '/');
 
-            if ($registeredUri === $uri && $definition['method'] === $method) {
-                $routeFound = true;
-
-                $middlewarePipeline = new MiddlewarePipeline();
-
-                foreach ($definition['middleware'] as $middlewareClass) {
-                    $middlewarePipeline->pipe($container->make($middlewareClass));
-                }
-
-                $response = $middlewarePipeline->process($request, function ($request) use ($container, $definition) {
-                    $action = $definition['action'];
-
-                    if (is_array($action)) {
-                        [$controller, $method] = $action;
-                        $controllerInstance = $container->make($controller);
-                        return $controllerInstance->$method();
-                    }
-
-                    if (is_callable($action)) {
-                        return call_user_func($action);
-                    }
-
-                    throw new Exception("Invalid route action");
-                });
-
-                echo $response;
-                return;
+            if (trim($definition['uri'], '/') === trim($request->uri(), '/') &&
+                $definition['method'] === $request->method()) {
+                return $route;
             }
         }
 
-        if (!$routeFound) {
-            http_response_code(404);
-            echo "404 Not Found";
+        return null;
+    }
+
+    private function resolveMiddlewareRoute(Route $route): array
+    {
+        $routeMiddleware = $route->getDefinition()['middleware'];
+        $expandedMiddleware = [];
+
+        foreach ($routeMiddleware as $mw) {
+            if (isset($this->middlewareStack->getGroupMiddleware()[$mw])) {
+                $expandedMiddleware = array_merge(
+                    $expandedMiddleware,
+                    $this->middlewareStack->getGroupMiddleware()[$mw]
+                );
+            } else {
+                $expandedMiddleware[] = $mw;
+            }
         }
+
+        return $expandedMiddleware;
+    }
+
+    private function executeRoute(Route $route, Container $container): mixed
+    {
+        $action = $route->getDefinition()['action'];
+
+        if (is_array($action)) {
+            [$controller, $method] = $action;
+            $controllerInstance = $container->make($controller);
+            return $controllerInstance->$method();
+        }
+
+        if (is_callable($action)) {
+            return call_user_func($action);
+        }
+
+        throw new Exception('Invalid route action');
+    }
+
+    private function sendNotFoundResponse(): void
+    {
+        http_response_code(404);
+        echo "404 Not Found";
     }
 }

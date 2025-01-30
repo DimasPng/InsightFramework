@@ -34,7 +34,7 @@ class Route
             'uri' => $this->uri,
             'action' => $this->action,
             'middleware' => $this->middleware,
-            'name' => $this->name
+            'name' => $this->name,
         ];
     }
 }

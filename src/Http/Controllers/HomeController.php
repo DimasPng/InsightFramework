@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Http\Controllers;
 
 use App\Core\Controller;
 use App\Services\DatabaseConnection;
@@ -17,10 +17,13 @@ class HomeController extends Controller
 
     public function index(): void
     {
-        //$result = $this->db->query('SHOW TABLES');
         $data = $this->service->getData();
-
         $this->render('home', ['title' => 'HomePage', 'content' => $data]);
+    }
+
+    public function dashboard(): void
+    {
+        $this->render('dashboard');
     }
 
     public function about(): void

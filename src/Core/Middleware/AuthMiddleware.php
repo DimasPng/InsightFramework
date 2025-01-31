@@ -4,6 +4,7 @@ namespace App\Core\Middleware;
 
 use App\Core\Auth\AuthManager;
 use App\Core\Request;
+use App\Http\Response\Response;
 
 class AuthMiddleware implements Middleware
 {
@@ -13,11 +14,10 @@ class AuthMiddleware implements Middleware
     {
     }
 
-    public function handle(Request $request, callable $next): mixed
+    public function handle(Request $request, callable $next): Response
     {
         if (!$this->auth->check()) {
-            http_response_code(403);
-            return 'Forbidden. You are not authenticated.';
+            return response()->json(['error' => 'Forbidden'], 403);
         }
 
         return $next($request);

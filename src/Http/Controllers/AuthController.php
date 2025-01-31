@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Core\Auth\AuthManager;
-use App\Core\Controller;
+use App\Http\Response\JsonResponse;
+use App\Http\Response\Response;
+use App\Http\Response\ViewResponse;
 
-class AuthController extends Controller
+class AuthController
 {
     public function __construct(
         protected AuthManager $auth
@@ -13,12 +15,12 @@ class AuthController extends Controller
     {
     }
 
-    public function index(): void
+    public function index(): ViewResponse
     {
-        $this->render('login');
+        return view('login');
     }
 
-    public function login(): void
+    public function login(): Response|JsonResponse
     {
         $credential = [
             'email' => $_POST['email'] ?? null,
@@ -26,17 +28,15 @@ class AuthController extends Controller
         ];
 
         if ($this->auth->attempt($credential)) {
-            echo 'You are logged in!';
-            return;
+            return response()->json(['message' => 'You are logged in!']);
         }
 
-        echo 'Invalid credentials.';
+        return response()->redirect('/login');
     }
 
-    public function logout(): void
+    public function logout(): Response
     {
         $this->auth->logout();
-
-        echo 'You have been logged out';
+        return response()->redirect('/');
     }
 }

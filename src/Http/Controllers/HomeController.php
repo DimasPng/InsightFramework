@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Core\Controller;
+use App\Http\Response\JsonResponse;
+use App\Http\Response\ViewResponse;
 use App\Services\DatabaseConnection;
 use App\Services\ExampleService;
 
-class HomeController extends Controller
+class HomeController
 {
     public function __construct(
         protected ExampleService     $service,
@@ -15,19 +16,19 @@ class HomeController extends Controller
     {
     }
 
-    public function index(): void
+    public function index(): ViewResponse
     {
         $data = $this->service->getData();
-        $this->render('home', ['title' => 'HomePage', 'content' => $data]);
+        return view('home', ['title' => 'HomePage', 'content' => $data]);
     }
 
-    public function dashboard(): void
+    public function dashboard(): ViewResponse
     {
-        $this->render('dashboard');
+        return view('dashboard');
     }
 
-    public function about(): void
+    public function about(): JsonResponse
     {
-        $this->render('about', ['title' => 'About us', 'content' => 'This is the about page']);
+        return response()->json(['status' => true, 'message' => 'Success']);
     }
 }

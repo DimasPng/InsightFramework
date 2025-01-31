@@ -42,7 +42,7 @@ class Router
             $middleware
         );
 
-        echo $response;
+        $response->send();
     }
 
     private function findRoute(Request $request): ?Route

@@ -3,6 +3,7 @@
 namespace App\Core\Middleware;
 
 use App\Core\Request;
+use App\Http\Response\Response;
 use Closure;
 
 class MiddlewareStack
@@ -20,7 +21,7 @@ class MiddlewareStack
         $this->groupMiddleware[$group] = $middleware;
     }
 
-    public function handle(Request $request, Closure $next, ?array $routeMiddleware = []): mixed
+    public function handle(Request $request, Closure $next, ?array $routeMiddleware = []): Response
     {
         $middleware = $this->createMiddlewareInstances(array_merge($this->globalMiddleware, $routeMiddleware));
 

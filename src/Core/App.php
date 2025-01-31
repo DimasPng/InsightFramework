@@ -2,8 +2,6 @@
 
 namespace App\Core;
 
-use ReflectionException;
-
 class App
 {
     protected static ?self $instance = null;
@@ -20,14 +18,14 @@ class App
         self::$instance = $this;
     }
 
-    /**
-     * @throws ReflectionException
-     */
     public function run(): void
     {
         $request = Request::capture();
 
-        $this->container->make(Router::class)->dispatch($request, $this->container);
+        /** @var Router $router */
+        $router = $this->container->make(Router::class);
+
+        $router->dispatch($request, $this->container);
     }
 
     protected function loadConfig(): void

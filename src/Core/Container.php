@@ -24,6 +24,9 @@ class Container
     }
 
     /**
+     * @template T
+     * @param class-string<T> $key
+     * @return T
      * @throws ReflectionException
      */
     public function make(string $key, array $parameters = []): object

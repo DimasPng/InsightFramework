@@ -4,24 +4,12 @@ namespace App\Core;
 
 class RouteCollection
 {
-    protected array $routes = [];
-    protected array $currentGroupAttributes = [];
+    private array $routes = [];
+    private array $currentGroupAttributes = [];
 
     public function add(Route $route): void
     {
-        if (!empty($this->currentGroupAttributes['prefix'])) {
-            $route->uri = trim($this->currentGroupAttributes['prefix'], '/') . '/' . trim($route->uri, '/');
-        }
-
-        if (!empty($this->currentGroupAttributes['middleware'])) {
-            $middleware = $this->currentGroupAttributes['middleware'];
-            $route->middleware($middleware);
-        }
-
-        if (!empty($this->currentGroupAttributes['name'])) {
-            $route->name($this->currentGroupAttributes['name'] . '.' . $route->name ?? '');
-        }
-
+        $this->applyGroupAttributes($route);
         $this->routes[] = $route;
     }
 
@@ -38,5 +26,33 @@ class RouteCollection
     public function getRoutes(): array
     {
         return $this->routes;
+    }
+
+    private function applyGroupAttributes(Route $route): void
+    {
+        $this->applyPrefix($route);
+        $this->applyMiddleware($route);
+        $this->applyName($route);
+    }
+
+    private function applyPrefix(Route $route): void
+    {
+        if (!empty($this->currentGroupAttributes['prefix'])) {
+            $route->uri = trim($this->currentGroupAttributes['prefix'], '/') . '/' . trim($route->uri, '/');
+        }
+    }
+
+    private function applyMiddleware(Route $route): void
+    {
+        if (!empty($this->currentGroupAttributes['middleware'])) {
+            $route->middleware($this->currentGroupAttributes['middleware']);
+        }
+    }
+
+    private function applyName(Route $route): void
+    {
+        if (!empty($this->currentGroupAttributes['name'])) {
+            $route->name($this->currentGroupAttributes['name'] . '.' . $route->name ?? '');
+        }
     }
 }

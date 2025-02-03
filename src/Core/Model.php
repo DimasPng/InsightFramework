@@ -2,6 +2,7 @@
 
 namespace App\Core;
 
+use App\Core\Database\QueryBuilder;
 use App\Services\DatabaseConnection;
 use Exception;
 use PDO;
@@ -12,6 +13,7 @@ abstract class Model
     protected static ?PDO $db = null;
     protected static string $table;
     protected static string $primaryKey = 'id';
+    protected bool $exists = false;
     //значения полей колонок
     protected array $attributes = [];
     protected array $fillable = [];
@@ -40,6 +42,28 @@ abstract class Model
         }
     }
 
+    public static function newFromRow(array $row): static
+    {
+        $model = new static();
+        $model->forceFill($row);
+        return $model;
+    }
+
+    public static function newInstance(array $attributes = [], bool $exists = false): static
+    {
+        $model = new static($attributes);
+        $model->exists = $exists;
+
+        return $model;
+    }
+
+    public static function create(array $attributes): static
+    {
+        $model = new static($attributes);
+        $model->save();
+        return $model;
+    }
+
     /**
      * @throws Exception
      */
@@ -55,50 +79,6 @@ abstract class Model
         $stmt->execute(['id' => $id]);
 
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row) {
-            return null;
-        }
-
-        $model = new static();
-        $model->forceFill($row);
-
-        return $model;
-    }
-
-    public static function where(string $columnName, mixed $value, string $operator = '='): array
-    {
-        self::ensureDbConnection();
-
-        $table = static::$table;
-
-        $sql = "SELECT * FROM {$table} WHERE {$columnName} {$operator} :value";
-
-        $stmt = self::$db->prepare($sql);
-        $stmt->bindParam(':value', $value);
-        $stmt->execute();
-
-        $results = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $model = new static();
-            $model->forceFill($row);
-            $results[] = $model;
-        }
-
-        return $results;
-    }
-
-    public static function findByEmail(string $email): ?static
-    {
-        self::ensureDbConnection();
-
-        $table = static::$table;
-
-        $sql = "SELECT * FROM {$table} WHERE email = :email LIMIT 1";
-        $stmt = self::$db->prepare($sql);
-        $stmt->execute(['email' => $email]);
-
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
         if (!$row) {
             return null;
         }
@@ -128,6 +108,41 @@ abstract class Model
         }
 
         return $results;
+    }
+
+    public static function findOneByAttributes(array $attributes): ?static
+    {
+        self::ensureDbConnection();
+
+        unset($attributes['password']);
+
+        if (empty($attributes)) {
+            return null;
+        }
+
+        $table = static::$table;
+
+        $conditions = [];
+        foreach ($attributes as $field => $value) {
+            $conditions[] = "{$field} = :{$field}";
+        }
+
+        $whereClause = implode(' AND ', $conditions);
+
+        $sql = "SELECT * FROM {$table} WHERE {$whereClause} LIMIT 1";
+
+        $stmt = self::$db->prepare($sql);
+        $stmt->execute($attributes);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$row) {
+            return null;
+        }
+
+        $model = new static();
+        $model->forceFill($row);
+
+        return $model;
     }
 
     public function save(): bool
@@ -213,4 +228,13 @@ abstract class Model
         }
     }
 
+    public static function query(): QueryBuilder
+    {
+        return new QueryBuilder(static::class);
+    }
+
+    public static function where(string $column, mixed $value, string $operator = '='): QueryBuilder
+    {
+        return static::query()->where($column, $operator, $value);
+    }
 }

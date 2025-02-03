@@ -13,14 +13,8 @@ class DatabaseUserProvider implements UserProviderInterface
 
     public function retrieveByCredentials(array $credentials): ?Authenticatable
     {
-        $email = $credentials['email'] ?? null;
-
-        if (!$email) {
-            return null;
-        }
-
         //TODO: Add ->get() and first() in the base model. Delete findByEmail
-        return User::findByEmail($email);
+        return User::findOneByAttributes($credentials);
     }
 
     public function validateCredentials(Authenticatable $user, array $credentials): bool

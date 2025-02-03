@@ -2,7 +2,7 @@
 
 namespace App\Core\Auth;
 
-class SessionGuard implements GuardInterface
+class SessionGuard implements StatefulGuardInterface
 {
     protected ?Authenticatable $user = null;
     protected string $sessionKey = 'auth_user_id';

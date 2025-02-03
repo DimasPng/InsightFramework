@@ -57,6 +57,24 @@ class Blueprint
         $this->columns[] = "remember_token VARCHAR(100) NULL";
     }
 
+    public function integer(string $name): self
+    {
+        $this->columns[] = "{$name} INT";
+        return $this;
+    }
+
+    public function bigInteger(string $name): self
+    {
+        $this->columns[] = "{$name} BIGINT";
+        return $this;
+    }
+
+    public function decimal(string $name, int $precision = 8, int $scale = 2): self
+    {
+        $this->columns[] = "{$name} DECIMAL ({$precision}, {$scale})";
+        return $this;
+    }
+
     public function toSql(): string
     {
         $columns = implode(", ", $this->columns);

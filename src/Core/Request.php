@@ -6,7 +6,7 @@ use App\Models\User;
 
 class Request
 {
-    private $user = null;
+    private ?User $user = null;
     private function __construct(
         protected string $uri,
         protected string $method
@@ -60,13 +60,52 @@ class Request
         return $headers;
     }
 
+    public function only(array $keys): array
+    {
+        $data = $this->getInputData();
+        return array_intersect_key($data, array_flip($keys));
+    }
+
     public function setUser(User $user): void
     {
         $this->user = $user;
     }
 
+    public function query(string $key = null, mixed $default = null): mixed
+    {
+        $queryParams = [];
+        parse_str($_SERVER['QUERY_STRING'] ?? '', $queryParams);
+
+        if (is_null($key)) {
+            return $queryParams;
+        }
+
+        return $queryParams[$key] ?? $default;
+    }
+
     public function getUser(): ?User
     {
         return $this->user;
+    }
+
+    private function getInputData(): array
+    {
+        $data = $_REQUEST;
+
+        if ($this->isJson()) {
+            $jsonInput = file_get_contents('php://input');
+            $decoded = json_decode($jsonInput, true);
+            if (is_array($decoded)) {
+                $data = array_merge($data, $decoded);
+            }
+        }
+
+        return $data;
+    }
+
+    private function isJson(): bool
+    {
+        $contentType = $this->header('content_type', '');
+        return str_contains($contentType, 'application/json');
     }
 }

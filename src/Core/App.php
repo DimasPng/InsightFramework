@@ -12,6 +12,7 @@ class App
     {
         $this->container = new Container();
         $this->container->singleton(Container::class, fn(Container $container) => $container);
+        $this->container->singleton(Request::class, fn() => Request::capture());
         $this->loadConfig();
         $this->registerProviders();
 
@@ -20,7 +21,7 @@ class App
 
     public function run(): void
     {
-        $request = Request::capture();
+        $request = $this->container->make(Request::class);
 
         /** @var Router $router */
         $router = $this->container->make(Router::class);

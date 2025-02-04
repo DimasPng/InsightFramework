@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Core\Middleware\MiddlewareStack;
+use App\Core\Middleware\StartSessionMiddleware;
 
 class Kernel
 {
@@ -16,7 +17,7 @@ class Kernel
 
     protected array $middlewareGroups = [
         'web' => [
-            \App\Core\Middleware\StartSessionMiddleware::class,
+            StartSessionMiddleware::class,
         ],
         'api' => [],
     ];

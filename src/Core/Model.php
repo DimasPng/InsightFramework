@@ -237,4 +237,9 @@ abstract class Model
     {
         return static::query()->where($column, $operator, $value);
     }
+
+    public static function getTable(): string
+    {
+        return static::$table;
+    }
 }

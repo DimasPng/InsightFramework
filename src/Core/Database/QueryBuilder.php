@@ -54,7 +54,7 @@ class QueryBuilder
     {
         /** @var Model $modelClass */
         $modelClass = $this->modelClass;
-        $table = $modelClass::$table;
+        $table = $modelClass::getTable();
         $sql = "SELECT * FROM {$table}" . $this->buildWhereClause();
         $db = $modelClass::getConnection();
 
@@ -79,7 +79,7 @@ class QueryBuilder
     {
         /** @var Model $modelClass */
         $modelClass = $this->modelClass;
-        $table = $modelClass::$table;
+        $table = $modelClass::getTable();
         $sql = "SELECT * FROM {$table}" . $this->buildWhereClause() . " LIMIT 1";
         $db = $modelClass::getConnection();
         if (!$db) {

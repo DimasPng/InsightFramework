@@ -32,6 +32,7 @@ class Router
 
         if (!$route) {
             $this->sendNotFoundResponse();
+            exit;
         }
 
         $middleware = $this->resolveMiddlewareRoute($route);
@@ -82,14 +83,8 @@ class Router
     {
         $action = $route->getDefinition()['action'];
 
-        if (is_array($action)) {
-            [$controller, $method] = $action;
-            $controllerInstance = $container->make($controller);
-            return $controllerInstance->$method();
-        }
-
-        if (is_callable($action)) {
-            return call_user_func($action);
+        if (is_array($action) || is_callable($action)) {
+            return $container->call($action);
         }
 
         throw new Exception('Invalid route action');

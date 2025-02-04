@@ -74,6 +74,21 @@ class Container
         return $reflection->newInstanceArgs($dependencies);
      }
 
+     public function call(callable|array $callable, array $parameters = [])
+     {
+         if (is_array($callable)) {
+             [$class, $method] = $callable;
+             $instance = $this->make($class);
+             return $this->callMethodWithDependencies($instance, $method, $parameters);
+         }
+
+         if (is_callable($callable)) {
+             return call_user_func_array($callable, $parameters);
+         }
+
+         throw new Exception("Invalid callable provided");
+     }
+
     /**
      * @throws Exception
      */
@@ -92,5 +107,29 @@ class Container
          }
 
          return $dependencies;
+     }
+
+     private function callMethodWithDependencies(object $instance, string $method, array $parameters = [])
+     {
+         $reflection = new ReflectionClass($instance);
+         $methodReflection = $reflection->getMethod($method);
+
+         $dependencies = [];
+         foreach ($methodReflection->getParameters() as $parameter) {
+             $name = $parameter->getName();
+             $type = $parameter->getType();
+
+             if (array_key_exists($name, $parameters)) {
+                 $dependencies[] = $parameters[$name];
+             } elseif ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
+                 $dependencies[] = $this->make($type->getName());
+             } elseif ($parameter->isDefaultValueAvailable()) {
+                 $dependencies[] = $parameter->getDefaultValue();
+             } else {
+                 throw new Exception("Cannot resolve parameter \${$name} in {$method}");
+             }
+         }
+
+         return $methodReflection->invokeArgs($instance, $dependencies);
      }
 }

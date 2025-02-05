@@ -66,6 +66,17 @@ class Request
         return array_intersect_key($data, array_flip($keys));
     }
 
+    public function input(string $key = null, mixed $default = null): mixed
+    {
+        $data = $this->getInputData();
+
+        if (is_null($key)) {
+            return $data;
+        }
+
+        return $data[$key] ?? $default;
+    }
+
     public function setUser(User $user): void
     {
         $this->user = $user;

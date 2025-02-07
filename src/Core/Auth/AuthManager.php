@@ -2,7 +2,7 @@
 
 namespace App\Core\Auth;
 
-use http\Exception\InvalidArgumentException;
+use InvalidArgumentException;
 
 class AuthManager
 {
@@ -47,9 +47,9 @@ class AuthManager
         return $guard;
     }
 
-    public function check(): bool
+    public function check(string $apiName): bool
     {
-        return $this->guard()->check();
+        return $this->guard($apiName)->check();
     }
 
     public function user(): ?Authenticatable

@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Core\Auth\AuthManager;
 use App\Core\Auth\DatabaseUserProvider;
 use App\Core\Auth\SessionGuard;
+use App\Core\Auth\UserProviderInterface;
 use App\Core\ServiceProvider;
 
 class AuthServiceProvider extends ServiceProvider
@@ -14,11 +15,6 @@ class AuthServiceProvider extends ServiceProvider
         $this->app->singleton(AuthManager::class, function () {
             return new AuthManager();
         });
-
-        //TODO: Make Facade auth
-//        $this->app->singleton('auth', function () {
-//            return new AuthManager();
-//        });
     }
 
     public function boot(): void

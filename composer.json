@@ -6,8 +6,7 @@
         }
     ],
     "require": {
-        "ext-pdo": "*",
-      "ext-http": "*"
+        "ext-pdo": "*"
     },
     "autoload": {
         "psr-4": {
@@ -16,5 +15,10 @@
         "files": [
             "src/Helpers/helpers.php"
         ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require-dev": {
+        "dimaspng/oauth2-auth": "^1.0"
     }
 }

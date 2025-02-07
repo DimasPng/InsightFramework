@@ -13,6 +13,7 @@ class DatabaseUserProvider implements UserProviderInterface
 
     public function retrieveByCredentials(array $credentials): ?Authenticatable
     {
+
         //TODO: Add ->get() and first() in the base model. Delete findByEmail
         return User::findOneByAttributes($credentials);
     }

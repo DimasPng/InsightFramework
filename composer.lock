@@ -4,13 +4,60 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b390793d50863f5464e04dd80ea2bb29",
+    "content-hash": "a8b48b7fc970c6629221aa6479a1e30d",
     "packages": [],
-    "packages-dev": [],
+    "packages-dev": [
+        {
+            "name": "dimaspng/oauth2-auth",
+            "version": "dev-main",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/DimasPng/MiniOAuth.git",
+                "reference": "0affc88cc36c56a7f8c8fda35fa55840034fe31a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/DimasPng/MiniOAuth/zipball/0affc88cc36c56a7f8c8fda35fa55840034fe31a",
+                "reference": "0affc88cc36c56a7f8c8fda35fa55840034fe31a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.4"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "dimaspng\\oauth2auth\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "DimasPNG",
+                    "email": "d.sagachko@gmail.com"
+                }
+            ],
+            "description": "OAuth2 package with JWT tokens for my framework",
+            "support": {
+                "issues": "https://github.com/DimasPng/MiniOAuth/issues",
+                "source": "https://github.com/DimasPng/MiniOAuth/tree/main"
+            },
+            "time": "2025-02-06T11:07:31+00:00"
+        }
+    ],
     "aliases": [],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "stability-flags": [],
-    "prefer-stable": false,
+    "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "ext-pdo": "*"
